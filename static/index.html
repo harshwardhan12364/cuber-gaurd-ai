@@ -6,61 +6,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberGuard A.I. | National Defense Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cyber: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            accent: '#6366f1', // Indigo 500
+                            glow: '#818cf8',   // Indigo 400
+                            danger: '#ef4444',
+                            success: '#10b981',
+                            warning: '#f59e0b'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'scan-line': 'scan 3s linear infinite',
+                    },
+                    keyframes: {
+                        shimmer: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100%)' }
+                        },
+                        scan: {
+                            '0%': { top: '0%' },
+                            '50%': { top: '100%' },
+                            '100%': { top: '0%' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
         body {
-            font-family: 'Space Grotesk', sans-serif;
-            background-color: #f8fafc;
+            background-color: #0b1120;
+            /* Very dark blue */
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 40%),
+                radial-gradient(circle at 0% 90%, rgba(16, 185, 129, 0.1), transparent 30%);
+            color: #e2e8f0;
         }
 
-        .card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        .msg {
-            padding: 12px 16px;
-            border-radius: 12px;
-            max-width: 85%;
-            margin-bottom: 12px;
-            font-size: 14px;
-            position: relative;
+        .input-glow:focus {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.8);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
         }
 
         .msg-scammer {
-            background-color: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            background: linear-gradient(135deg, #281515 0%, #450a0a 100%);
+            border-left: 3px solid #ef4444;
+            color: #fca5a5;
         }
 
         .msg-agent {
-            background-color: #f0f9ff;
-            color: #075985;
-            border: 1px solid #bae6fd;
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-right: 3px solid #6366f1;
+            color: #e2e8f0;
         }
 
-        .typing .dot {
+        .typing-dot {
             width: 6px;
             height: 6px;
-            background: #0ea5e9;
+            background: #818cf8;
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
 
-        .dot:nth-child(1) {
+        .typing-dot:nth-child(1) {
             animation-delay: -0.32s;
         }
 
-        .dot:nth-child(2) {
+        .typing-dot:nth-child(2) {
             animation-delay: -0.16s;
         }
 
@@ -76,274 +132,429 @@
                 transform: scale(1);
             }
         }
+
+        .scan-overlay {
+            background: linear-gradient(to bottom, transparent, rgba(99, 102, 241, 0.2), transparent);
+            height: 20px;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 
-<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+<body class="h-screen flex flex-col overflow-hidden text-sm selection:bg-indigo-500 selection:text-white">
 
     <!-- HEADER -->
-    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10 shrink-0">
+    <header class="h-16 glass-panel border-b-0 border-b-white/10 flex items-center justify-between px-6 z-20 shrink-0">
         <div class="flex items-center gap-3">
-            <div
-                class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+            <div class="relative">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-[#0f172a] rounded-full">
+                </div>
             </div>
             <div>
-                <h1 class="font-bold text-xl leading-none">CyberGuard <span class="text-indigo-600">A.I.</span></h1>
-                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">National Security Grid</p>
+                <h1 class="font-bold text-xl leading-none tracking-tight">CyberGuard <span
+                        class="text-indigo-400">A.I.</span></h1>
+                <p class="text-[10px] font-bold tracking-[0.2em] text-cyan-400 uppercase mt-1">Classification System
+                    v2.0</p>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <div
-                class="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-100">
-                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
-                ML MODEL: ONLINE
+
+        <div class="flex items-center gap-6">
+            <div class="hidden md:flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    SERVER: ONLINE</span>
+                <span class="w-px h-3 bg-slate-700"></span>
+                <span class="flex items-center gap-1"><span
+                        class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span> ML: ACTIVE</span>
             </div>
+            <button
+                class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-500/30 border border-indigo-400/30">
+                EXPORT REPORT
+            </button>
         </div>
     </header>
 
-    <!-- MAIN GRID -->
-    <main class="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden max-w-[1600px] mx-auto w-full">
+    <!-- CONTENT -->
+    <main class="flex-1 p-4 lg:p-6 grid grid-cols-12 gap-6 overflow-hidden max-w-[1800px] mx-auto w-full relative z-10">
 
-        <!-- LEFT: SPECIALIZED CHECKERS (NEW) -->
-        <section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto pr-2">
-            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Deep Scan Tools</h2>
-
-            <!-- Link Checker -->
-            <div class="card p-5 hover:border-indigo-300 transition group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="link" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-sm font-bold">Link Analyzer</div>
-                </div>
-                <input type="text" id="check-link" placeholder="Paste URL..."
-                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
-                <button onclick="runCheck('link')"
-                    class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Verify
-                    Link Integrity</button>
-                <div id="res-link" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
+        <!-- 1. LEFT PANEL: DEEPER SCANNING TOOLS -->
+        <section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto pr-1">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest"><i data-lucide="scan-line"
+                        class="inline w-3 h-3 mr-1"></i> Forensic Tools</h2>
             </div>
 
-            <!-- Number Checker -->
-            <div class="card p-5 hover:border-indigo-300 transition group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="phone" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-sm font-bold">Origin Tracer</div>
-                </div>
-                <input type="text" id="check-phone" placeholder="+91..."
-                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
-                <button onclick="runCheck('phone')"
-                    class="w-full py-2 bg-green-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Trace
-                    Origin</button>
-                <div id="res-phone" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
-            </div>
+            <!-- Tool Container -->
+            <div class="space-y-4">
 
-            <!-- UPI Checker -->
-            <div class="card p-5 hover:border-indigo-300 transition group">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="credit-card"
-                            class="w-5 h-5"></i></div>
-                    <div class="text-sm font-bold">Financial Fraud Check</div>
+                <!-- URL Scanner -->
+                <div class="glass-panel p-4 rounded-xl group hover:border-indigo-500/50 transition duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2 text-indigo-400 font-bold">
+                            <i data-lucide="globe" class="w-4 h-4"></i> URL Analysis
+                        </div>
+                        <span
+                            class="text-[10px] font-mono bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">HTTP/S</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="check-link" placeholder="Enter suspicious link..."
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 transition-colors text-slate-300 placeholder-slate-600">
+                        <button onclick="runCheck('link')"
+                            class="absolute right-1 top-1 p-1 bg-indigo-600 rounded-md text-white hover:bg-indigo-500 transition">
+                            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    <div id="res-link" class="hidden mt-3 pt-3 border-t border-slate-700/50 text-xs"></div>
                 </div>
-                <input type="text" id="check-upi" placeholder="user@bank"
-                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
-                <button onclick="runCheck('upi')"
-                    class="w-full py-2 bg-purple-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Validate
-                    VPA</button>
-                <div id="res-upi" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
+
+                <!-- Phone Scanner -->
+                <div class="glass-panel p-4 rounded-xl group hover:border-emerald-500/50 transition duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2 text-emerald-400 font-bold">
+                            <i data-lucide="phone-call" class="w-4 h-4"></i> Phone Trace
+                        </div>
+                        <span
+                            class="text-[10px] font-mono bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">H.L.R.</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="check-phone" placeholder="+91 98765..."
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 transition-colors text-slate-300 placeholder-slate-600">
+                        <button onclick="runCheck('phone')"
+                            class="absolute right-1 top-1 p-1 bg-emerald-600 rounded-md text-white hover:bg-emerald-500 transition">
+                            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    <div id="res-phone" class="hidden mt-3 pt-3 border-t border-slate-700/50 text-xs"></div>
+                </div>
+
+                <!-- UPI Scanner -->
+                <div class="glass-panel p-4 rounded-xl group hover:border-cyan-500/50 transition duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2 text-cyan-400 font-bold">
+                            <i data-lucide="wallet" class="w-4 h-4"></i> UPI / VPA Logic
+                        </div>
+                        <span
+                            class="text-[10px] font-mono bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">FINTECH</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="check-upi" placeholder="scammer@bank"
+                            class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 transition-colors text-slate-300 placeholder-slate-600">
+                        <button onclick="runCheck('upi')"
+                            class="absolute right-1 top-1 p-1 bg-cyan-600 rounded-md text-white hover:bg-cyan-500 transition">
+                            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                    <div id="res-upi" class="hidden mt-3 pt-3 border-t border-slate-700/50 text-xs"></div>
+                </div>
+
             </div>
         </section>
 
-        <!-- CENTER: CHAT INTERFACE (PRESERVED) -->
-        <section class="col-span-12 lg:col-span-6 flex flex-col h-full card overflow-hidden relative shadow-lg">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h3 class="font-bold text-sm">Autonomous Interceptor</h3>
-                    <div class="text-[10px] text-gray-500 font-mono flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Live Session
+
+        <!-- 2. CENTER PANEL: INTERCEPTOR CHAT -->
+        <section
+            class="col-span-12 lg:col-span-6 flex flex-col h-full overflow-hidden relative glass-panel rounded-2xl border-t-2 border-t-indigo-500/20">
+
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <div class="absolute inset-0 w-2 h-2 rounded-full bg-red-500 animate-ping opacity-75"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm tracking-wide text-white">LIVE INTERCEPTION</h3>
+                        <div class="text-[10px] text-slate-500 font-mono">ENCRYPTED CHANNEL • MONITORING</div>
                     </div>
                 </div>
-                <select id="personaSelect"
-                    class="text-xs font-bold bg-white border border-gray-200 rounded px-2 py-1 outline-none hover:border-indigo-400 transition">
-                    <option value="naive">Persona: Naive Victim</option>
-                    <option value="skeptic">Persona: Security Analyst</option>
-                    <option value="angry">Persona: Hostile Target</option>
-                </select>
+
+                <!-- Persona Switcher -->
+                <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
+                    <i data-lucide="user-cog" class="w-3 h-3 text-slate-400 ml-2"></i>
+                    <select id="personaSelect"
+                        class="bg-transparent text-xs font-bold text-slate-300 px-2 py-1 outline-none cursor-pointer">
+                        <option value="naive">Target: Naive Elderly</option>
+                        <option value="skeptic">Target: Skeptic Techie</option>
+                        <option value="angry">Target: Hostile User</option>
+                    </select>
+                </div>
             </div>
 
-            <div id="chatContainer" class="flex-1 p-6 overflow-y-auto bg-white"></div>
+            <!-- Chat Area -->
+            <div id="chatContainer" class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-900/30 relative">
+                <!-- Welcome Message -->
+                <div class="flex justify-center my-4">
+                    <div
+                        class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-mono py-1 px-3 rounded-full">
+                        SYSTEM INITIALIZED. WAITING FOR INCOMING THREATS.
+                    </div>
+                </div>
+            </div>
 
+            <!-- Typing Indicator -->
             <div id="typing" class="hidden px-6 pb-2">
-                <div class="flex gap-1 p-2 bg-gray-50 rounded-lg w-fit">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
+                <div class="flex gap-1 p-3 bg-slate-800/50 rounded-xl rounded-tl-sm w-fit border border-slate-700">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
                 </div>
             </div>
 
-            <div class="p-4 border-t bg-gray-50">
-                <div class="flex gap-2">
+            <!-- Input Area -->
+            <div class="p-4 bg-slate-900/80 backdrop-blur border-t border-white/5">
+                <div class="relative flex items-center gap-2">
+                    <div class="absolute left-4 text-slate-500"><i data-lucide="terminal" class="w-4 h-4"></i></div>
                     <input type="text" id="mainInput"
-                        class="flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-                        placeholder="Inject live threat message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                        class="w-full bg-slate-800/50 border border-slate-700 text-slate-200 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3.5 text-sm focus:outline-none focus:border-indigo-500 focus:bg-slate-800 transition-all font-mono shadow-inner"
+                        placeholder="Paste scam message here to analyze..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
                     <button onclick="sendMessage()"
-                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl transition shadow-lg shadow-indigo-200"><i
-                            data-lucide="send-horizontal" class="w-5 h-5"></i></button>
+                        class="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white p-3.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
+                        <i data-lucide="send-horizontal" class="w-5 h-5"></i>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- RIGHT: ML ANALYSIS (NEW) -->
-        <section class="col-span-12 lg:col-span-3 card p-5 flex flex-col gap-6">
-            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-Time Analysis</h2>
 
-            <!-- Confidence Score -->
-            <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-gray-300">
-                <div class="text-[10px] font-bold text-gray-400 uppercase mb-2">ML Model Confidence</div>
-                <div id="ml-conf-text" class="text-4xl font-bold text-slate-300">0%</div>
-                <div id="ml-intent-text" class="text-xs font-mono text-gray-400 mt-1">WAITING FOR INPUT</div>
-            </div>
+        <!-- 3. RIGHT PANEL: INTELLIGENCE DASHBOARD -->
+        <section class="col-span-12 lg:col-span-3 flex flex-col gap-6">
 
-            <!-- Feedback Loop (Self Learning Sim) -->
-            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                <h3 class="text-xs font-bold text-indigo-800 mb-2 flex items-center gap-2"><i data-lucide="refresh-cw"
-                        class="w-3 h-3"></i> Adaptive Learning</h3>
-                <p class="text-[10px] text-indigo-600 mb-3 leading-relaxed">System automatically updates threat weights
-                    based on this interaction.</p>
-                <div class="h-1 bg-indigo-200 rounded-full overflow-hidden">
-                    <div class="w-2/3 h-full bg-indigo-500 animate-[shimmer_2s_infinite]"></div>
+            <!-- ML Confidence Card -->
+            <div class="glass-panel p-6 rounded-2xl relative overflow-hidden group">
+                <div
+                    class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                </div>
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Threat Probablity</h3>
+                    <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+
+                <div class="flex items-end gap-2 mb-2">
+                    <div id="ml-conf-text" class="text-5xl font-bold text-white tracking-tighter">0%</div>
+                    <div class="text-xs text-slate-500 font-mono mb-2">CONFIDENCE</div>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-full h-2 w-full overflow-hidden mb-3">
+                    <div id="ml-bar" class="h-full bg-indigo-500 w-0 transition-all duration-1000 ease-out"></div>
+                </div>
+
+                <div id="ml-intent-text"
+                    class="text-center text-xs font-mono py-1.5 px-2 bg-slate-800 rounded border border-slate-700 text-slate-300">
+                    IDLE
                 </div>
             </div>
 
-            <!-- Extracted Intel Mini -->
-            <div>
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Extracted Data</h3>
-                <div id="intel-list" class="space-y-2 text-xs font-mono text-gray-600">
-                    <div class="opacity-50 italic">No data extracted yet.</div>
+            <!-- Extracted Intel -->
+            <div class="glass-panel p-5 rounded-2xl flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Entities Detected</h3>
+                    <div class="animate-pulse w-2 h-2 rounded-full bg-cyan-500"></div>
+                </div>
+
+                <div id="intel-list" class="flex-1 space-y-3 overflow-y-auto pr-1">
+                    <div class="text-center py-10 text-slate-600 italic text-xs">
+                        Scanning incoming packets...<br>No entities saved.
+                    </div>
                 </div>
             </div>
         </section>
 
     </main>
 
+    <!-- JS LOGIC -->
     <script>
         lucide.createIcons();
-        const API_URL = "http://localhost:8000/api";
+        const API_URL = "http://localhost:8000/api"; // Ensure this matches your server
         let history = [];
-        let sessionId = "ML-" + Math.floor(Math.random() * 10000);
+        let sessionId = "ML-" + Math.floor(Math.random() * 100000);
 
+        // --- CORE CHAT LOGIC ---
         async function sendMessage() {
             const input = document.getElementById('mainInput');
             const text = input.value.trim();
             if (!text) return;
 
-            // UI: Set Scanning State
+            // 1. UI Updates
             addMsg('scammer', text);
             input.value = '';
             document.getElementById('typing').classList.remove('hidden');
 
-            // Visual "Realtime" Feedback
-            document.getElementById('ml-conf-text').innerText = "...";
-            document.getElementById('ml-conf-text').className = "text-4xl font-bold text-indigo-400 animate-pulse";
-            document.getElementById('ml-intent-text').innerText = "ANALYZING PATTERNS...";
+            // Reset & Animate ML Card
+            document.getElementById('ml-intent-text').innerText = "CALCULATING TENSORS...";
+            document.getElementById('ml-intent-text').className = "text-center text-xs font-mono py-1.5 px-2 bg-indigo-900/30 text-indigo-300 border border-indigo-500/30 rounded animate-pulse";
 
             try {
                 const res = await fetch(`${API_URL}/honeypot`, {
-                    method: 'POST', headers: { 'x-api-key': 'sk_test_123456789', 'Content-Type': 'application/json' },
+                    method: 'POST',
+                    headers: { 'x-api-key': 'sk_test_123456789', 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         sessionId: sessionId,
                         message: { sender: 'scammer', text: text, timestamp: new Date().toISOString() },
                         metadata: { persona: document.getElementById('personaSelect').value },
-                        conversationHistory: history // Pass history for context
+                        conversationHistory: history
                     })
                 });
                 const data = await res.json();
 
-                // Track history
+                // 2. Update History
                 history.push({ sender: 'scammer', text: text });
                 history.push({ sender: 'agent', text: data.reply });
 
+                // 3. Simulate "Thinking" Delay for realism
                 setTimeout(() => {
                     document.getElementById('typing').classList.add('hidden');
                     addMsg('agent', data.reply);
                     updateMLStats(data.ml_analysis);
                     updateIntel(data.extracted_intelligence);
-                }, 800);
+                }, 800 + Math.random() * 500);
 
             } catch (e) {
                 console.error(e);
                 document.getElementById('typing').classList.add('hidden');
-                document.getElementById('ml-intent-text').innerText = "CONNECTION ERROR";
+                addMsg('system', "Error connecting to Neural Engine. Please ensure backend is running.");
             }
-        }
-
-        async function runCheck(type) {
-            const val = document.getElementById(`check-${type}`).value;
-            const resBox = document.getElementById(`res-${type}`);
-            if (!val) return;
-
-            resBox.innerHTML = '<div class="animate-pulse text-gray-400">Scanning global databases...</div>';
-            resBox.classList.remove('hidden');
-
-            const res = await fetch(`${API_URL}/check`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: type, value: val })
-            });
-            const data = await res.json();
-
-            // Render Result
-            let color = data.score > 0.8 ? 'text-red-600' : 'text-green-600';
-            resBox.innerHTML = `
-                <div class="font-bold ${color} mb-1">RISK SCORE: ${(data.score * 100).toFixed(0)}%</div>
-                ${data.details ? data.details.map(d => `<div class="text-[10px] text-gray-500">• ${d}</div>`).join('') : ''}
-                ${data.carrier ? `<div class="text-[10px] text-gray-500">Carrier: ${data.carrier}</div>` : ''}
-                ${data.flag ? `<div class="text-[10px] text-red-500 font-bold">${data.flag}</div>` : ''}
-            `;
         }
 
         function addMsg(role, text) {
             const c = document.getElementById('chatContainer');
-            c.innerHTML += `
-                <div class="msg ${role === 'agent' ? 'msg-agent' : 'msg-scammer'} shadow-sm">
-                    <div class="text-[9px] font-bold uppercase mb-1 opacity-50">${role}</div>
-                    ${text}
+
+            let html = '';
+            if (role === 'system') {
+                html = `<div class="text-center text-[10px] text-red-400 font-mono my-2 border border-red-900 bg-red-900/10 p-1 rounded">${text}</div>`;
+            } else {
+                const isAgent = role === 'agent';
+                html = `
+                <div class="flex flex-col ${isAgent ? 'items-start' : 'items-end'} mb-4 animate-[fadeIn_0.3s_ease-out]">
+                    <div class="text-[9px] font-bold uppercase mb-1 text-slate-500 tracking-wider">${isAgent ? 'CyberGuard NODE-1' : 'UNKNOWN SOURCE'}</div>
+                    <div class="max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${isAgent ? 'msg-agent rounded-tl-none' : 'msg-scammer rounded-tr-none'}">
+                        ${text}
+                    </div>
                 </div>`;
+            }
+
+            c.insertAdjacentHTML('beforeend', html);
             c.scrollTop = c.scrollHeight;
         }
 
+        // --- ANALYTICS UI UPDATES ---
         function updateMLStats(ml) {
             const conf = Math.round(ml.confidence * 100);
             const el = document.getElementById('ml-conf-text');
+            const bar = document.getElementById('ml-bar');
             const intent = document.getElementById('ml-intent-text');
 
-            // Animate number
+            // Determine Risk Color
+            let colorClass = 'text-green-400';
+            let barColor = 'bg-green-500';
+            let riskLabel = 'LOW RISK';
+
+            if (conf > 50) { colorClass = 'text-yellow-400'; barColor = 'bg-yellow-500'; riskLabel = 'MODERATE RISK'; }
+            if (conf > 85) { colorClass = 'text-red-500'; barColor = 'bg-red-500'; riskLabel = 'CRITICAL THREAT'; }
+
+            // Animate Counter
             let start = 0;
             const step = () => {
-                start += 5;
+                start += 2;
                 if (start > conf) start = conf;
                 el.innerText = start + "%";
-                el.className = `text-4xl font-bold ${conf > 80 ? 'text-red-500' : (conf > 50 ? 'text-yellow-500' : 'text-green-500')}`;
+                el.className = `text-5xl font-bold tracking-tighter ${colorClass}`;
                 if (start < conf) requestAnimationFrame(step);
             };
             step();
 
-            intent.innerText = `INTENT: ${ml.intent.toUpperCase()}`;
+            // Update Bar & Text
+            bar.className = `h-full ${barColor} transition-all duration-1000`;
+            bar.style.width = conf + "%";
+
+            intent.innerHTML = `<span class="${colorClass}">${riskLabel}:</span> ${ml.intent.toUpperCase().replace('_', ' ')}`;
+            intent.className = "text-center text-xs font-mono py-1.5 px-2 bg-slate-800 rounded border border-slate-700 text-slate-300";
         }
 
         function updateIntel(intel) {
             const list = document.getElementById('intel-list');
             list.innerHTML = '';
-            const add = (label, items) => {
-                if (items.length) list.innerHTML += `
-                    <div class="bg-white p-2 border rounded">
-                        <div class="text-[9px] font-bold uppercase text-gray-400">${label}</div>
-                        ${items.map(i => `<div class="truncate select-all">${i}</div>`).join('')}
-                    </div>`;
+
+            let hasData = false;
+
+            const createItem = (icon, color, label, items) => {
+                if (!items || items.length === 0) return;
+                hasData = true;
+
+                const itemsHtml = items.map(i => `
+                    <div class="flex items-center justify-between group cursor-pointer hover:bg-slate-700/50 p-1.5 rounded transition">
+                        <span class="truncate font-mono text-slate-300 select-all">${i}</span>
+                        <i data-lucide="copy" class="w-3 h-3 text-slate-600 opacity-0 group-hover:opacity-100" onclick="navigator.clipboard.writeText('${i}')"></i>
+                    </div>
+                `).join('');
+
+                list.innerHTML += `
+                <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden mb-2">
+                    <div class="bg-${color}-500/10 px-3 py-2 border-b border-${color}-500/10 flex items-center gap-2">
+                        <i data-lucide="${icon}" class="w-3 h-3 text-${color}-400"></i>
+                        <span class="text-[10px] font-bold uppercase text-${color}-400 tracking-wider">${label}</span>
+                    </div>
+                    <div class="p-2 space-y-1 text-[11px]">
+                        ${itemsHtml}
+                    </div>
+                </div>`;
             };
-            add('Phone', intel.phoneNumbers);
-            add('Links', intel.phishingLinks);
-            add('Financial', intel.upiIds);
+
+            createItem('phone', 'emerald', 'Identified Numbers', intel.phoneNumbers);
+            createItem('link', 'indigo', 'Malicious Links', intel.phishingLinks);
+            createItem('credit-card', 'cyan', 'Financial Handles', intel.upiIds);
+            createItem('alert-triangle', 'orange', 'Trigger Words', intel.suspiciousKeywords);
+
+            if (!hasData) {
+                list.innerHTML = `<div class="text-center py-6 text-slate-600 italic text-xs">No threats extracted from this payload.</div>`;
+            }
+
+            lucide.createIcons();
+        }
+
+        // --- EXTERNAL TOOLS LOGIC ---
+        async function runCheck(type) {
+            const val = document.getElementById(`check-${type}`).value;
+            const resBox = document.getElementById(`res-${type}`);
+            if (!val) return;
+
+            resBox.innerHTML = '<div class="flex items-center gap-2 text-slate-400"><i data-lucide="loader-2" class="animate-spin w-3 h-3"></i> Querying databases...</div>';
+            resBox.classList.remove('hidden');
+            lucide.createIcons();
+
+            try {
+                const res = await fetch(`${API_URL}/check`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: type, value: val })
+                });
+                const data = await res.json();
+
+                // Style results
+                let riskColor = data.score > 0.7 ? 'text-red-400' : (data.score > 0.4 ? 'text-orange-400' : 'text-emerald-400');
+                let detailsHtml = data.details ? data.details.map(d => `<div class="text-slate-400">• ${d}</div>`).join('') : '';
+
+                resBox.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-slate-200">Analysis Result</span>
+                        <span class="font-mono font-bold ${riskColor}">${(data.score * 100).toFixed(0)}% RISK</span>
+                    </div>
+                    <div class="space-y-1 text-slate-500 font-mono text-[10px]">
+                        ${detailsHtml}
+                        ${data.carrier ? `<div>CARRIER: <span class="text-slate-300">${data.carrier}</span></div>` : ''}
+                        ${data.location ? `<div>LOC: <span class="text-slate-300">${data.location}</span></div>` : ''}
+                        ${data.flag ? `<div class="text-red-400 font-bold mt-1">🚩 ${data.flag}</div>` : ''}
+                    </div>
+                `;
+
+            } catch (e) {
+                resBox.innerHTML = `<span class="text-red-500">Error: Could not verify.</span>`;
+            }
         }
     </script>
 </body>

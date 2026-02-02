@@ -8,13 +8,23 @@ import re
 import random
 import logging
 import hashlib
+import sys
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure logging with a more professional format
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger("CyberGuardAI")
 
-app = FastAPI()
+app = FastAPI(
+    title="CyberGuard AI Defense Platform",
+    description="Autonomous Scam Interception & Analysis System",
+    version="2.0.0"
+)
 
+# CORS Policy
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,6 +32,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger.info("Initializing CyberGuard AI Core Systems...")
+logger.info("Loading Neural Weights & Heuristic Engines...")
 
 API_KEY = "sk_test_123456789"
 
