@@ -292,7 +292,10 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "Who is this?",
                 "Do I know you?",
                 "Please check the number again.",
-                "Sorry, I am busy right now."
+                "Sorry, I am busy right now.",
+                "Is this a work number?",
+                "I don't recall giving you my number.",
+                "What is this regarding?"
             ]
         },
         "scam_urgency": {
@@ -303,9 +306,12 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "Wait... I am looking for my glasses. Hold on.",
                 "Is it okay if I go to the bank branch tomorrow instead?",
                 "Please sir, I am a pensioner. Don't cut my connection.",
-                "I am trying to open the app but it's not working!",
+                "I are trying to open the app but it's not working!",
                 "Can you wait 5 minutes? I am cooking.",
-                "It says 'Error 404'. What does that mean?"
+                "It says 'Error 404'. What does that mean?",
+                "Will I lose all my contacts if I don't do this?",
+                "I am pressing the button but nothing is happening.",
+                "Can I call my grandson to help me?"
             ],
             "skeptic": [
                 "I need a formal notice via email first.", 
@@ -315,7 +321,9 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "I will call the official customer care to verify this.",
                 "What is your Employee ID? I'm checking it now.",
                 "This sounds extremely suspicious.",
-                "Why are you creating false urgency?"
+                "Why are you creating false urgency?",
+                "Send me an official letter on the bank letterhead.",
+                "I don't discuss sensitive matters on WhatsApp."
             ],
             "angry": [
                 "STOP THREATENING ME!", 
@@ -324,7 +332,9 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "WHO IS THIS? GET A REAL JOB!",
                 "I ALREADY PAID! STOP HARASSING ME!",
                 "YOU ARE A SCAMMER! I KNOW IT!",
-                "SHUT UP! I AM BUSY!"
+                "SHUT UP! I AM BUSY!",
+                "I AM BLOCKING YOU RIGHT NOW!",
+                "HOW DARE YOU SPEAK TO ME LIKE THAT!"
             ]
         },
         "scam_greed": {
@@ -335,7 +345,10 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "Do I need to give you my bank account number?",
                 "I am so happy! Thank you sir. What is the next step?",
                 "Is this the Kaun Banega Crorepati one?",
-                "Can you send it to my wife's google pay?"
+                "Can you send it to my wife's google pay?",
+                "I promise I will share 10% with you sir.",
+                "This is the best day of my life!",
+                "Do I have to come to Mumbai to collect it?"
             ],
             "skeptic": [
                 "Nothing in life is free. What is the catch?", 
@@ -344,14 +357,18 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "I need to verify this with the lottery commission.",
                 "Why do I need to pay a registration fee if I won?",
                 "This looks like a classic advance-fee fraud.",
-                "I am not interested. Please remove me."
+                "I am not interested. Please remove me.",
+                "If it's free, just deduct the fee from the winnings.",
+                "I'm reporting this number to the telecom authority."
             ],
             "angry": [
                 "I DON'T WANT YOUR TRASH!", 
                 "SCAMMER! STOP MESSAGING ME!", 
                 "DELETE MY NUMBER FROM YOUR LIST!",
                 "I KNOW THIS IS FAKE! GET LOST!",
-                "DO YOU THINK I AM STUPID?"
+                "DO YOU THINK I AM STUPID?",
+                "GO CHEAT SOMEONE ELSE!",
+                "I HAVE ENOUGH MONEY, I DON'T NEED YOURS!"
             ]
         },
         "scam_fear": {
@@ -361,7 +378,10 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "Can I pay a fine to stop the police coming?",
                 "I am shaking right now... please help me.",
                 "Don't tell my family please. I will do whatever you say.",
-                "Is it possible to solve this online?"
+                "Is it possible to solve this online?",
+                "I swear I didn't do anything illegal.",
+                "Please give me one chance, I will pay whatever.",
+                "My heart is weak, please don't scare me."
             ],
             "skeptic": [
                 "Quote the FIR Number and Police Station ID.", 
@@ -369,14 +389,18 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "This is intimidation. I'm reporting this number.",
                 "Police do not send warnings on WhatsApp.",
                 "Send me a picture of the warrant.",
-                "I am calling the Cyber Crime cell right now."
+                "I am calling the Cyber Crime cell right now.",
+                "Which DCP authorized this?",
+                "I know the procedure, stop bluffing."
             ],
             "angry": [
                 "COME AND ARREST ME THEN!", 
                 "I KNOW THE COMMISSIONER PERSONALLY!", 
                 "YOU ARE FAKE POLICE! I AM NOT SCARED!",
                 "TRY ME! SEE WHAT HAPPENS!",
-                "I DARE YOU TO COME TO MY HOUSE!"
+                "I DARE YOU TO COME TO MY HOUSE!",
+                "YOU WILL BE THE ONE IN JAIL SOON!",
+                "FAKE BADGE! FAKE OFFICER!"
             ]
         },
          "scam_link": {
@@ -385,29 +409,59 @@ def generate_smart_reply(text: str, intent: str, persona: str, history: List[Mes
                 "It asks for a password... should I give my email password?",
                 "My internet is slow. Can you send the link again?",
                 "Is this safe? My phone says 'Warning'.",
-                "I don't see the blue button you are talking about."
+                "I don't see the blue button you are talking about.",
+                "It says 'Site can't be reached'.",
+                "Do I need to download the APK?"
             ],
             "skeptic": [
                 "That domain looks fake. It's not the official site.",
                 "Why is it not an HTTPS link?",
                 "I will only log in through the main app, not this link.",
                 "Virustotal flagged this URL as malicious.",
-                "Nice try, I'm not clicking that."
+                "Nice try, I'm not clicking that.",
+                "Bitly links are always suspicious.",
+                "Why don't you email it from the official domain?"
             ],
              "angry": [
                 "I AM NOT CLICKING THAT MALWARE!",
                 "DO YOU WANT TO HACK ME?",
                 "STOP SENDING LINKS!",
-                "I BLOCKED THIS DOMAIN ALREADY!"
+                "I BLOCKED THIS DOMAIN ALREADY!",
+                "NICE TRY HACKER!"
+            ]
+        },
+        "scam_generic": {
+            "naive": [
+                "I don't understand what you mean.",
+                "Can you explain that again simpler?",
+                "My english is not very good sorry.",
+                "Okay... and then what?",
+                "I am confused."
+            ],
+            "skeptic": [
+                "Be more specific.",
+                "I don't trust vague messages.",
+                "Who exactly are you?",
+                "State your business clearly."
+            ],
+            "angry": [
+                "STOP WASTING MY TIME!",
+                "WHAT DO YOU WANT?",
+                "GET TO THE POINT!",
+                "LEAVE ME ALONE!"
             ]
         }
     }
     
     # 1. Select Category
-    cat_answers = responses.get(intent, responses["scam_urgency"]).get(persona, ["I don't understand."])
+    # Better fallback logic: Try precise intent -> Then generic scam -> Then safe
+    if intent not in responses:
+        intent = "scam_generic"
+        
+    cat_answers = responses.get(intent, responses["scam_generic"]).get(persona, ["I don't understand."])
     
     # 2. Filter out recently used answers to prevent repetition
-    recent_replies = [m.text for m in history[-4:] if m.sender == "agent"] if history else []
+    recent_replies = [m.text for m in history[-6:] if m.sender == "agent"] if history else []
     valid_answers = [a for a in cat_answers if a not in recent_replies]
     
     # 3. Fallback if all used
