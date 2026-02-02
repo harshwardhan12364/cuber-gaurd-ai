@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard A.I. | National Defense Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            margin-bottom: 12px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .msg-scammer {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-agent {
+            background-color: #f0f9ff;
+            color: #075985;
+            border: 1px solid #bae6fd;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .typing .dot {
+            width: 6px;
+            height: 6px;
+            background: #0ea5e9;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden text-slate-800">
+
+    <!-- HEADER -->
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 z-10 shrink-0">
+        <div class="flex items-center gap-3">
+            <div
+                class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-xl leading-none">CyberGuard <span class="text-indigo-600">A.I.</span></h1>
+                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">National Security Grid</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div
+                class="flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-100">
+                <div class="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></div>
+                ML MODEL: ONLINE
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="flex-1 p-6 grid grid-cols-12 gap-6 overflow-hidden max-w-[1600px] mx-auto w-full">
+
+        <!-- LEFT: SPECIALIZED CHECKERS (NEW) -->
+        <section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto pr-2">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Deep Scan Tools</h2>
+
+            <!-- Link Checker -->
+            <div class="card p-5 hover:border-indigo-300 transition group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-sm font-bold">Link Analyzer</div>
+                </div>
+                <input type="text" id="check-link" placeholder="Paste URL..."
+                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
+                <button onclick="runCheck('link')"
+                    class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Verify
+                    Link Integrity</button>
+                <div id="res-link" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
+            </div>
+
+            <!-- Number Checker -->
+            <div class="card p-5 hover:border-indigo-300 transition group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-green-50 rounded-lg text-green-600"><i data-lucide="phone" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-sm font-bold">Origin Tracer</div>
+                </div>
+                <input type="text" id="check-phone" placeholder="+91..."
+                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
+                <button onclick="runCheck('phone')"
+                    class="w-full py-2 bg-green-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Trace
+                    Origin</button>
+                <div id="res-phone" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
+            </div>
+
+            <!-- UPI Checker -->
+            <div class="card p-5 hover:border-indigo-300 transition group">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-purple-50 rounded-lg text-purple-600"><i data-lucide="credit-card"
+                            class="w-5 h-5"></i></div>
+                    <div class="text-sm font-bold">Financial Fraud Check</div>
+                </div>
+                <input type="text" id="check-upi" placeholder="user@bank"
+                    class="w-full text-xs p-2 border rounded mb-3 bg-gray-50 focus:bg-white transition">
+                <button onclick="runCheck('upi')"
+                    class="w-full py-2 bg-purple-600 text-white rounded-lg text-xs font-bold mb-3 shadow hover:shadow-md transition">Validate
+                    VPA</button>
+                <div id="res-upi" class="hidden text-xs bg-gray-50 p-2 rounded border border-gray-100"></div>
+            </div>
+        </section>
+
+        <!-- CENTER: CHAT INTERFACE (PRESERVED) -->
+        <section class="col-span-12 lg:col-span-6 flex flex-col h-full card overflow-hidden relative shadow-lg">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h3 class="font-bold text-sm">Autonomous Interceptor</h3>
+                    <div class="text-[10px] text-gray-500 font-mono flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Live Session
+                    </div>
+                </div>
+                <select id="personaSelect"
+                    class="text-xs font-bold bg-white border border-gray-200 rounded px-2 py-1 outline-none hover:border-indigo-400 transition">
+                    <option value="naive">Persona: Naive Victim</option>
+                    <option value="skeptic">Persona: Security Analyst</option>
+                    <option value="angry">Persona: Hostile Target</option>
+                </select>
+            </div>
+
+            <div id="chatContainer" class="flex-1 p-6 overflow-y-auto bg-white"></div>
+
+            <div id="typing" class="hidden px-6 pb-2">
+                <div class="flex gap-1 p-2 bg-gray-50 rounded-lg w-fit">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-gray-50">
+                <div class="flex gap-2">
+                    <input type="text" id="mainInput"
+                        class="flex-1 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+                        placeholder="Inject live threat message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button onclick="sendMessage()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl transition shadow-lg shadow-indigo-200"><i
+                            data-lucide="send-horizontal" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: ML ANALYSIS (NEW) -->
+        <section class="col-span-12 lg:col-span-3 card p-5 flex flex-col gap-6">
+            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Real-Time Analysis</h2>
+
+            <!-- Confidence Score -->
+            <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-gray-300">
+                <div class="text-[10px] font-bold text-gray-400 uppercase mb-2">ML Model Confidence</div>
+                <div id="ml-conf-text" class="text-4xl font-bold text-slate-300">0%</div>
+                <div id="ml-intent-text" class="text-xs font-mono text-gray-400 mt-1">WAITING FOR INPUT</div>
+            </div>
+
+            <!-- Feedback Loop (Self Learning Sim) -->
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                <h3 class="text-xs font-bold text-indigo-800 mb-2 flex items-center gap-2"><i data-lucide="refresh-cw"
+                        class="w-3 h-3"></i> Adaptive Learning</h3>
+                <p class="text-[10px] text-indigo-600 mb-3 leading-relaxed">System automatically updates threat weights
+                    based on this interaction.</p>
+                <div class="h-1 bg-indigo-200 rounded-full overflow-hidden">
+                    <div class="w-2/3 h-full bg-indigo-500 animate-[shimmer_2s_infinite]"></div>
+                </div>
+            </div>
+
+            <!-- Extracted Intel Mini -->
+            <div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Extracted Data</h3>
+                <div id="intel-list" class="space-y-2 text-xs font-mono text-gray-600">
+                    <div class="opacity-50 italic">No data extracted yet.</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const API_URL = "http://localhost:8000/api";
+        let history = [];
+        let sessionId = "ML-" + Math.floor(Math.random() * 10000);
+
+        async function sendMessage() {
+            const input = document.getElementById('mainInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // UI: Set Scanning State
+            addMsg('scammer', text);
+            input.value = '';
+            document.getElementById('typing').classList.remove('hidden');
+
+            // Visual "Realtime" Feedback
+            document.getElementById('ml-conf-text').innerText = "...";
+            document.getElementById('ml-conf-text').className = "text-4xl font-bold text-indigo-400 animate-pulse";
+            document.getElementById('ml-intent-text').innerText = "ANALYZING PATTERNS...";
+
+            try {
+                const res = await fetch(`${API_URL}/honeypot`, {
+                    method: 'POST', headers: { 'x-api-key': 'sk_test_123456789', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        message: { sender: 'scammer', text: text, timestamp: new Date().toISOString() },
+                        metadata: { persona: document.getElementById('personaSelect').value },
+                        conversationHistory: history // Pass history for context
+                    })
+                });
+                const data = await res.json();
+
+                // Track history
+                history.push({ sender: 'scammer', text: text });
+                history.push({ sender: 'agent', text: data.reply });
+
+                setTimeout(() => {
+                    document.getElementById('typing').classList.add('hidden');
+                    addMsg('agent', data.reply);
+                    updateMLStats(data.ml_analysis);
+                    updateIntel(data.extracted_intelligence);
+                }, 800);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('typing').classList.add('hidden');
+                document.getElementById('ml-intent-text').innerText = "CONNECTION ERROR";
+            }
+        }
+
+        async function runCheck(type) {
+            const val = document.getElementById(`check-${type}`).value;
+            const resBox = document.getElementById(`res-${type}`);
+            if (!val) return;
+
+            resBox.innerHTML = '<div class="animate-pulse text-gray-400">Scanning global databases...</div>';
+            resBox.classList.remove('hidden');
+
+            const res = await fetch(`${API_URL}/check`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, value: val })
+            });
+            const data = await res.json();
+
+            // Render Result
+            let color = data.score > 0.8 ? 'text-red-600' : 'text-green-600';
+            resBox.innerHTML = `
+                <div class="font-bold ${color} mb-1">RISK SCORE: ${(data.score * 100).toFixed(0)}%</div>
+                ${data.details ? data.details.map(d => `<div class="text-[10px] text-gray-500">• ${d}</div>`).join('') : ''}
+                ${data.carrier ? `<div class="text-[10px] text-gray-500">Carrier: ${data.carrier}</div>` : ''}
+                ${data.flag ? `<div class="text-[10px] text-red-500 font-bold">${data.flag}</div>` : ''}
+            `;
+        }
+
+        function addMsg(role, text) {
+            const c = document.getElementById('chatContainer');
+            c.innerHTML += `
+                <div class="msg ${role === 'agent' ? 'msg-agent' : 'msg-scammer'} shadow-sm">
+                    <div class="text-[9px] font-bold uppercase mb-1 opacity-50">${role}</div>
+                    ${text}
+                </div>`;
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function updateMLStats(ml) {
+            const conf = Math.round(ml.confidence * 100);
+            const el = document.getElementById('ml-conf-text');
+            const intent = document.getElementById('ml-intent-text');
+
+            // Animate number
+            let start = 0;
+            const step = () => {
+                start += 5;
+                if (start > conf) start = conf;
+                el.innerText = start + "%";
+                el.className = `text-4xl font-bold ${conf > 80 ? 'text-red-500' : (conf > 50 ? 'text-yellow-500' : 'text-green-500')}`;
+                if (start < conf) requestAnimationFrame(step);
+            };
+            step();
+
+            intent.innerText = `INTENT: ${ml.intent.toUpperCase()}`;
+        }
+
+        function updateIntel(intel) {
+            const list = document.getElementById('intel-list');
+            list.innerHTML = '';
+            const add = (label, items) => {
+                if (items.length) list.innerHTML += `
+                    <div class="bg-white p-2 border rounded">
+                        <div class="text-[9px] font-bold uppercase text-gray-400">${label}</div>
+                        ${items.map(i => `<div class="truncate select-all">${i}</div>`).join('')}
+                    </div>`;
+            };
+            add('Phone', intel.phoneNumbers);
+            add('Links', intel.phishingLinks);
+            add('Financial', intel.upiIds);
+        }
+    </script>
+</body>
+
+</html>

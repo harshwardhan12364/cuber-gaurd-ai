@@ -1,0 +1,10 @@
+{
+    "name": "shield-protocol",
+    "version": "1.0.0",
+    "description": "S.H.I.E.L.D. Protocol - Autonomous Defense System",
+    "main": "index.html",
+    "scripts": {
+        "start": "python -m uvicorn main:app --reload"
+    },
+    "dependencies": {}
+}
