@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police AI Agent | Cyber Fraud Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'badge-pulse': 'badgePulse 2s ease-in-out infinite',
+                        'scan': 'scan 3s ease-in-out infinite',
+                        'typing': 'typing 1.5s steps(40) infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    },
+                    keyframes: {
+                        badgePulse: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.4)', opacity: '0.8' },
+                            '50%': { boxShadow: '0 0 40px rgba(59, 130, 246, 0.7)', opacity: '1' }
+                        },
+                        scan: {
+                            '0%, 100%': { top: '0%', opacity: '0' },
+                            '50%': { top: '100%', opacity: '1' },
+                        },
+                        typing: {
+                            'from': { width: '0' },
+                            'to': { width: '100%' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0a0e27 100%);
+            background-attachment: fixed;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .officer-avatar {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            animation: badge-pulse 2s ease-in-out infinite;
+        }
+
+        .voice-pulse {
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+            display: none;
+        }
+
+        .speaking .voice-pulse {
+            display: block;
+        }
+
+        @keyframes ping {
+
+            75%,
+            100% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+            animation: scan 2s linear infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e40af;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-gray-100 font-sans">
+
+    <!-- Header -->
+    <header class="glass-card border-b-2 border-blue-500/30 sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div
+                            class="officer-avatar w-16 h-16 rounded-full flex items-center justify-center relative overflow-hidden ring-4 ring-blue-500/20">
+                            <i data-lucide="user-round" class="w-10 h-10 text-white relative z-10"></i>
+                            <div class="absolute inset-0 bg-blue-500/10 animate-pulse"></div>
+                            <!-- Hologram Effect Overlays -->
+                            <div class="absolute inset-0 pointer-events-none">
+                                <div class="w-full h-px bg-blue-300 opacity-30 absolute top-1/4 animate-scan"></div>
+                                <div class="w-full h-px bg-blue-300 opacity-20 absolute top-1/2 animate-scan"
+                                    style="animation-delay: 1s"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full border-2 border-[#1a1f3a] flex items-center justify-center shadow-lg">
+                            <i data-lucide="cpu" class="w-3 h-3 text-white animate-spin-slow"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-2xl font-bold text-white tracking-tight">Officer Harsh</h1>
+                            <span
+                                class="text-[9px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30 font-bold uppercase tracking-widest">Synthetic
+                                Human A.I.</span>
+                        </div>
+                        <p class="text-xs text-blue-400 font-mono flex items-center gap-2">
+                            <span class="flex gap-0.5">
+                                <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></span>
+                                <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"
+                                    style="animation-delay: 0.2s"></span>
+                                <span class="w-1 h-3 bg-blue-500 rounded-full animate-pulse"
+                                    style="animation-delay: 0.4s"></span>
+                            </span>
+                            Digitally Conscious Component • National Cyber Cell
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div
+                        class="hidden lg:flex items-center gap-3 bg-slate-900/50 p-2 rounded-xl border border-blue-500/10">
+                        <div class="flex gap-1 items-end h-6">
+                            <div class="w-1.5 bg-blue-600 rounded-t-sm animate-[bounce_1.2s_infinite]"></div>
+                            <div class="w-1.5 bg-blue-500 rounded-t-sm animate-[bounce_1.2s_infinite_0.2s]"
+                                style="height: 80%"></div>
+                            <div class="w-1.5 bg-blue-400 rounded-t-sm animate-[bounce_1.2s_infinite_0.4s]"
+                                style="height: 60%"></div>
+                            <div class="w-1.5 bg-blue-500 rounded-t-sm animate-[bounce_1.2s_infinite_0.6s]"
+                                style="height: 90%"></div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[9px] font-bold text-blue-400 uppercase tracking-widest leading-none">
+                                Neural Load</div>
+                            <div class="text-[14px] font-mono font-bold text-white">4.2 TFlops</div>
+                        </div>
+                    </div>
+                    <a href="/"
+                        class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20 border border-blue-400/30">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> LEAVE PORTAL
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Panel: Email Analysis -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- Email Fraud Analyzer -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                    <div class="scan-line"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i data-lucide="heart-handshake" class="w-6 h-6 text-blue-400"></i>
+                            Safety Guide: Email & Links
+                        </h2>
+                        <span
+                            class="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full border border-blue-500/30">
+                            EMPATHETIC PROTECTION
+                        </span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-400 mb-2">Sender Email</label>
+                            <input type="email" id="emailSender" placeholder="suspicious@example.com"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-400 mb-2">Email Subject</label>
+                            <input type="text" id="emailSubject" placeholder="Urgent: Verify your account"
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-400 mb-2">Email Content</label>
+                            <textarea id="emailContent" rows="6"
+                                placeholder="Paste the suspicious email content here..."
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+                        </div>
+
+                        <button onclick="analyzeEmail()"
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 rounded-lg font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2">
+                            <i data-lucide="scan-search" class="w-5 h-5"></i>
+                            ANALYZE FOR FRAUD
+                        </button>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div id="analysisResults" class="hidden mt-6 pt-6 border-t border-slate-700">
+                        <!-- Results will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Chat with Officer -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-xl font-bold flex items-center gap-2">
+                                <i data-lucide="message-circle" class="w-6 h-6 text-blue-400"></i>
+                                Chat with Officer
+                            </h2>
+                            <button onclick="toggleVoice()" id="voiceToggle"
+                                class="bg-slate-800 hover:bg-slate-700 text-[10px] font-bold px-2 py-1 rounded border border-slate-700 flex items-center gap-1.5 transition-all">
+                                <i data-lucide="volume-2" class="w-3 h-3 text-blue-400"></i>
+                                VOICE: <span id="voiceStatus">ON</span>
+                            </button>
+                        </div>
+                        <span id="officerStatus"
+                            class="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">
+                            AVAILABLE
+                        </span>
+                    </div>
+
+                    <div id="chatMessages" class="space-y-4 mb-4 h-96 overflow-y-auto pr-2">
+                        <!-- Welcome Message -->
+                        <div class="flex items-start gap-3">
+                            <div class="relative group">
+                                <div class="voice-pulse"></div>
+                                <div
+                                    class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 relative z-10">
+                                    <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+                                </div>
+                            </div>
+                            <div
+                                class="flex-1 bg-blue-900/30 border border-blue-500/30 rounded-2xl rounded-tl-none p-4">
+                                <div class="text-xs text-blue-400 font-bold mb-1">Officer Harsh</div>
+                                <p class="text-sm">Namaste, I am Officer Harsh, Cyber Crime Investigator. How may
+                                    I assist you today with fraud-related concerns?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <div class="flex-1 relative">
+                            <input type="text" id="chatInput"
+                                placeholder="Ask about fraud, scams, or report an incident..."
+                                class="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                                onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button onclick="startListening()" id="micBtn"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-blue-400 transition-colors">
+                                <i data-lucide="mic" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <button onclick="sendMessage()"
+                            class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg transition-all shadow-lg shadow-blue-500/20">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Panel: Statistics & Resources -->
+            <div class="space-y-6">
+
+                <!-- Cyber Evidence Bag (AI Human Feature) -->
+                <div class="glass-card rounded-2xl p-6 border-blue-500/40 relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="folder-search" class="w-5 h-5 text-blue-400"></i>
+                        Evidence Bag
+                    </h3>
+                    <div id="evidenceBag"
+                        class="border-2 border-dashed border-blue-500/20 rounded-xl p-8 text-center hover:border-blue-500/50 transition-all cursor-pointer relative">
+                        <div class="space-y-2">
+                            <i data-lucide="fingerprint" class="w-10 h-10 text-blue-400 mx-auto animate-pulse"></i>
+                            <p class="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Aritificial
+                                Intelligence Analysis</p>
+                            <p class="text-[11px] text-gray-500">Drop suspect data here for fingerprinting</p>
+                        </div>
+                        <!-- Forensic Analysis Overlay (Hidden by default) -->
+                        <div id="forensicScan"
+                            class="absolute inset-0 bg-slate-900 flex items-center justify-center hidden rounded-xl">
+                            <div class="w-full px-4 text-center">
+                                <div class="mb-2 h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 animate-[typing_2s_linear_infinite]"></div>
+                                </div>
+                                <p class="text-[9px] font-mono text-blue-400 animate-pulse">DECODING DIGITAL
+                                    SIGNATURE...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fraud Statistics -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="trending-up" class="w-5 h-5 text-orange-400"></i>
+                        Fraud Statistics 2024
+                    </h3>
+                    <div id="statsContainer" class="space-y-3">
+                        <div class="text-center py-4">
+                            <div class="typing-indicator flex justify-center gap-1">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Loading statistics...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prevention Tips -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i>
+                        Prevention Tips
+                    </h3>
+                    <div id="tipsContainer" class="space-y-2 text-xs">
+                        <!-- Tips will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Emergency Contacts -->
+                <div
+                    class="glass-card rounded-2xl p-6 bg-gradient-to-br from-red-900/20 to-slate-900/50 border-red-500/30">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-red-400">
+                        <i data-lucide="phone-call" class="w-5 h-5"></i>
+                        Emergency Contacts
+                    </h3>
+                    <div id="contactsContainer" class="space-y-3">
+                        <!-- Contacts will be loaded here -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const API_URL = "/api/police";
+        let isVoiceEnabled = true;
+        let isListening = false;
+        const synth = window.speechSynthesis;
+        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = Recognition ? new Recognition() : null;
+
+        if (recognition) {
+            recognition.continuous = false;
+            recognition.lang = 'en-IN'; // Indian English for the officer
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('chatInput').value = transcript;
+                isListening = false;
+                updateMicUI();
+                sendMessage();
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                updateMicUI();
+            };
+        }
+
+        function toggleVoice() {
+            isVoiceEnabled = !isVoiceEnabled;
+            const status = document.getElementById('voiceStatus');
+            const icon = document.querySelector('#voiceToggle i');
+
+            if (isVoiceEnabled) {
+                status.innerText = 'ON';
+                icon.setAttribute('data-lucide', 'volume-2');
+                const utter = new SpeechSynthesisUtterance("Voice mode activated.");
+                utter.rate = 0.9;
+                synth.speak(utter);
+            } else {
+                status.innerText = 'OFF';
+                icon.setAttribute('data-lucide', 'volume-x');
+                synth.cancel();
+            }
+            lucide.createIcons();
+        }
+
+        function startListening() {
+            if (!recognition) {
+                alert("Speech recognition is not supported in this browser.");
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+                return;
+            }
+            isListening = true;
+            recognition.start();
+            updateMicUI();
+        }
+
+        function updateMicUI() {
+            const micBtn = document.getElementById('micBtn');
+            if (isListening) {
+                micBtn.classList.add('text-red-500', 'animate-pulse');
+                micBtn.innerHTML = '<i data-lucide="mic-off" class="w-4 h-4"></i>';
+            } else {
+                micBtn.classList.remove('text-red-500', 'animate-pulse');
+                micBtn.innerHTML = '<i data-lucide="mic" class="w-4 h-4"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        function speak(text) {
+            if (!isVoiceEnabled) return;
+
+            // Cancel any current speech
+            synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+
+            // Get available voices and pick a good one
+            const voices = synth.getVoices();
+            // Try to find a softer, more natural sounding voice
+            const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Natural') || v.name.includes('Female'));
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.rate = 0.9; // Empathy and clarity
+            utterance.pitch = 1.0; // Natural tone
+
+            utterance.onstart = () => {
+                document.querySelectorAll('.flex-shrink-0.relative').forEach(el => el.classList.add('speaking'));
+            };
+
+            utterance.onend = () => {
+                document.querySelectorAll('.flex-shrink-0.relative').forEach(el => el.classList.remove('speaking'));
+            };
+
+            synth.speak(utterance);
+        }
+
+        // Load initial data
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStatistics();
+            loadPreventionTips();
+            loadEmergencyContacts();
+            // Welcome speech (soft and human)
+            setTimeout(() => {
+                speak("Hello. I am Officer Harsh. Please don't worry, I'm here to listen and help you stay safe. How can I assist you today?");
+            }, 1500);
+        });
+
+        // Email Analysis
+        async function analyzeEmail() {
+            const sender = document.getElementById('emailSender').value;
+            const subject = document.getElementById('emailSubject').value;
+            const content = document.getElementById('emailContent').value;
+
+            if (!content.trim()) {
+                alert('Please enter email content to analyze');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('analysisResults');
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="typing-indicator flex justify-center gap-1 mb-3">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <p class="text-sm text-gray-400">Analyzing email for fraud patterns...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_URL}/analyze-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email_content: content,
+                        sender: sender,
+                        subject: subject
+                    })
+                });
+
+                const data = await response.json();
+                displayAnalysisResults(data.analysis);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="text-red-400 text-sm">Error: ${error.message}</div>`;
+            }
+        }
+
+        function displayAnalysisResults(analysis) {
+            const resultsDiv = document.getElementById('analysisResults');
+
+            const threatColors = {
+                'CRITICAL': 'red',
+                'HIGH': 'orange',
+                'MEDIUM': 'yellow',
+                'LOW': 'green'
+            };
+
+            const color = threatColors[analysis.threat_level] || 'gray';
+
+            let html = `
+                <div class="space-y-4">
+                    <!-- Threat Level -->
+                    <div class="bg-${color}-900/30 border border-${color}-500/30 rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-${color}-400">THREAT LEVEL</span>
+                            <span class="text-2xl font-bold text-${color}-400">${analysis.threat_level}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-400">Risk Score</span>
+                            <span class="font-mono text-${color}-400">${(analysis.risk_score * 100).toFixed(0)}%</span>
+                        </div>
+                        <div class="mt-2 bg-slate-800 rounded-full h-2 overflow-hidden">
+                            <div class="bg-${color}-500 h-full transition-all duration-1000" style="width: ${(analysis.risk_score * 100)}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Fraud Type -->
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <div class="text-xs text-gray-400 mb-1">FRAUD TYPE DETECTED</div>
+                        <div class="text-sm font-bold text-white">${analysis.fraud_type}</div>
+                    </div>
+
+                    <!-- Red Flags -->
+                    ${analysis.red_flags.length > 0 ? `
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <div class="text-xs text-gray-400 mb-2">🚩 RED FLAGS DETECTED</div>
+                        <ul class="space-y-1 text-xs">
+                            ${analysis.red_flags.map(flag => `<li class="text-red-400">• ${flag}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+
+                    <!-- Extracted Entities -->
+                    ${Object.values(analysis.extracted_entities).some(arr => arr.length > 0) ? `
+                    <div class="bg-slate-800/50 rounded-xl p-4">
+                        <div class="text-xs text-gray-400 mb-2">EXTRACTED ENTITIES</div>
+                        <div class="space-y-2 text-xs">
+                            ${analysis.extracted_entities.emails.length > 0 ? `
+                                <div><span class="text-blue-400">📧 Emails:</span> ${analysis.extracted_entities.emails.join(', ')}</div>
+                            ` : ''}
+                            ${analysis.extracted_entities.phone_numbers.length > 0 ? `
+                                <div><span class="text-green-400">📱 Phones:</span> ${analysis.extracted_entities.phone_numbers.join(', ')}</div>
+                            ` : ''}
+                            ${analysis.extracted_entities.urls.length > 0 ? `
+                                <div><span class="text-orange-400">🔗 URLs:</span> ${analysis.extracted_entities.urls.join(', ')}</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Recommendations -->
+                    <div class="bg-blue-900/30 border border-blue-500/30 rounded-xl p-4">
+                        <div class="text-xs text-blue-400 font-bold mb-2">OFFICER'S RECOMMENDATIONS</div>
+                        <ul class="space-y-1 text-xs">
+                            ${analysis.recommendations.map(rec => `<li class="text-gray-300">${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Legal Actions -->
+                    ${analysis.legal_actions && analysis.legal_actions.length > 0 ? `
+                    <div class="bg-purple-900/30 border border-purple-500/30 rounded-xl p-4">
+                        <div class="text-xs text-purple-400 font-bold mb-2">⚖️ LEGAL INFORMATION</div>
+                        <ul class="space-y-1 text-xs text-gray-300">
+                            ${analysis.legal_actions.map(action => `<li>• ${action}</li>`).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Chat functionality
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            if (!query) return;
+
+            // Add user message
+            addChatMessage('user', query);
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                const response = await fetch(`${API_URL}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    addChatMessage('officer', data.response);
+                    speak(data.response);
+                }, 800 + Math.random() * 500);
+
+            } catch (error) {
+                removeTypingIndicator();
+                addChatMessage('system', 'Error connecting to officer. Please try again.');
+            }
+        }
+
+        function addChatMessage(role, text) {
+            const container = document.getElementById('chatMessages');
+
+            let html = '';
+            if (role === 'user') {
+                html = `
+                    <div class="flex items-start gap-3 justify-end">
+                        <div class="flex-1 bg-slate-800/50 border border-slate-700 rounded-2xl rounded-tr-none p-4 max-w-md ml-auto">
+                            <p class="text-sm">${text}</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="user" class="w-5 h-5 text-gray-300"></i>
+                        </div>
+                    </div>
+                `;
+            } else if (role === 'officer') {
+                html = `
+                    <div class="flex items-start gap-3">
+                        <div class="relative group">
+                            <div class="voice-pulse"></div>
+                            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 relative z-10">
+                                <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-blue-900/30 border border-blue-500/30 rounded-2xl rounded-tl-none p-4">
+                            <div class="text-xs text-blue-400 font-bold mb-1">Officer Aryan Kumar</div>
+                            <p class="text-sm">${text}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.insertAdjacentHTML('beforeend', html);
+            container.scrollTop = container.scrollHeight;
+            lucide.createIcons();
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const html = `
+                <div id="typingIndicator" class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="bg-blue-900/30 border border-blue-500/30 rounded-2xl rounded-tl-none p-4">
+                        <div class="typing-indicator flex gap-1">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            container.scrollTop = container.scrollHeight;
+            lucide.createIcons();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        // Load Statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_URL}/statistics`);
+                const data = await response.json();
+                const stats = data.data;
+
+                const html = `
+                    <div class="bg-red-900/30 border border-red-500/30 rounded-xl p-4 text-center">
+                        <div class="text-3xl font-bold text-red-400">${stats.total_cases_india}</div>
+                        <div class="text-xs text-gray-400">Total Cases (2024)</div>
+                    </div>
+                    <div class="bg-orange-900/30 border border-orange-500/30 rounded-xl p-4 text-center">
+                        <div class="text-3xl font-bold text-orange-400">${stats.total_loss}</div>
+                        <div class="text-xs text-gray-400">Total Loss</div>
+                    </div>
+                    <div class="space-y-2">
+                        ${stats.top_frauds.slice(0, 4).map(fraud => `
+                            <div class="bg-slate-800/50 rounded-lg p-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-bold text-gray-300">${fraud.type}</span>
+                                    <span class="text-xs text-blue-400">${fraud.percentage}%</span>
+                                </div>
+                                <div class="bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-blue-500 h-full" style="width: ${fraud.percentage}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                document.getElementById('statsContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load Prevention Tips
+        async function loadPreventionTips() {
+            try {
+                const response = await fetch(`${API_URL}/prevention-tips`);
+                const data = await response.json();
+
+                const html = data.tips.map(tip => `
+                    <div class="bg-slate-800/50 rounded-lg p-3 hover:bg-slate-800 transition-colors">
+                        <p class="text-gray-300">${tip}</p>
+                    </div>
+                `).join('');
+
+                document.getElementById('tipsContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading tips:', error);
+            }
+        }
+
+        // Load Emergency Contacts
+        async function loadEmergencyContacts() {
+            try {
+                const response = await fetch(`${API_URL}/emergency-contacts`);
+                const data = await response.json();
+                const contacts = data.contacts;
+
+                const html = `
+                    <div class="bg-slate-900/80 rounded-lg p-4 border border-red-500/30">
+                        <div class="text-xs text-gray-400 mb-1">National Helpline</div>
+                        <div class="text-3xl font-bold text-white tracking-wider">${contacts.national_helpline.number}</div>
+                        <div class="text-xs text-red-400 mt-1">Available ${contacts.national_helpline.availability}</div>
+                    </div>
+                    <button onclick="window.open('${contacts.online_portal.url}', '_blank')"
+                        class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 py-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="external-link" class="w-4 h-4"></i>
+                        REPORT ONLINE
+                    </button>
+                    <div class="text-xs text-gray-500 text-center">
+                        For immediate assistance, call the helpline or visit the official portal
+                    </div>
+                `;
+
+                document.getElementById('contactsContainer').innerHTML = html;
+                lucide.createIcons();
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

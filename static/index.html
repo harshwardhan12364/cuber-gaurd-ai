@@ -172,6 +172,13 @@
                 <span class="flex items-center gap-1"><span
                         class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span> ML: ACTIVE</span>
             </div>
+            <button onclick="togglePolicePanel()"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-blue-500/30 border border-blue-400/30 flex items-center gap-2 group relative overflow-hidden">
+                <div
+                    class="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500">
+                </div>
+                <i data-lucide="shield-alert" class="w-3 h-3 animate-pulse"></i> SAFETY ASSISTANT
+            </button>
             <button id="exportBtn" onclick="exportReport()"
                 class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-500/30 border border-indigo-400/30 flex items-center gap-2">
                 <i data-lucide="download" class="w-3 h-3"></i> EXPORT REPORT
@@ -249,9 +256,31 @@
                             <i data-lucide="arrow-right" class="w-3 h-3"></i>
                         </button>
                     </div>
-                    <div id="res-upi" class="hidden mt-3 pt-3 border-t border-slate-700/50 text-xs"></div>
                 </div>
 
+                <!-- Harsh AI: Forensic Safety Assistant (Integrated Feature) -->
+                <div
+                    class="glass-panel p-4 rounded-xl group border-blue-500/30 bg-blue-900/10 hover:border-blue-500/50 transition duration-300">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2 text-blue-400 font-bold">
+                            <i data-lucide="dna" class="w-4 h-4"></i> Harsh AI Assistant
+                        </div>
+                        <span
+                            class="text-[9px] font-bold bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30 uppercase">Neural
+                            Expert</span>
+                    </div>
+                    <div class="relative">
+                        <textarea id="police-content"
+                            placeholder="Paste suspicious content (emails, chats, links) here..."
+                            class="w-full h-16 bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-2 text-[10px] focus:outline-none focus:border-blue-500 transition-colors text-slate-300 placeholder-slate-600 mb-2 resize-none"></textarea>
+                        <button onclick="runPoliceCheck()"
+                            class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold text-white transition-all shadow-lg shadow-blue-500/20">
+                            RUN FORENSIC SCAN
+                        </button>
+                    </div>
+                    <div id="res-police"
+                        class="hidden mt-3 pt-3 border-t border-blue-500/20 text-[10px] text-slate-300 space-y-2"></div>
+                </div>
             </div>
         </section>
 
@@ -276,11 +305,12 @@
                 <!-- Persona Switcher -->
                 <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
                     <i data-lucide="user-cog" class="w-3 h-3 text-slate-400 ml-2"></i>
-                    <select id="personaSelect"
+                    <select id="personaSelect" onchange="updateAgentIdentity()"
                         class="bg-transparent text-xs font-bold text-slate-300 px-2 py-1 outline-none cursor-pointer">
                         <option value="naive">Target: Naive Elderly</option>
                         <option value="skeptic">Target: Skeptic Techie</option>
                         <option value="angry">Target: Hostile User</option>
+                        <option value="police">AI Assistant: Officer Harsh (Expert)</option>
                     </select>
                 </div>
             </div>
@@ -363,6 +393,29 @@
                     </div>
                 </div>
             </div>
+
+            <!-- UNIQUE FEATURE: EMERGENCY RESOURCES -->
+            <div
+                class="glass-panel p-5 rounded-2xl bg-gradient-to-br from-red-900/20 to-slate-900/50 border-red-500/20">
+                <h3 class="text-xs font-bold text-red-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Emergency Support
+                </h3>
+                <div class="space-y-3">
+                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700">
+                        <div class="text-[10px] text-slate-500 uppercase font-bold">Helpline (National)</div>
+                        <div class="text-lg font-bold text-white tracking-widest">1930</div>
+                        <div class="text-[9px] text-red-400 mt-1">AVAILABLE 24/7 IN INDIA</div>
+                    </div>
+                    <button onclick="window.open('https://cybercrime.gov.in', '_blank')"
+                        class="w-full bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 py-2 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="external-link" class="w-3 h-3"></i> REPORT ON OFFICIAL PORTAL
+                    </button>
+                    <div class="text-[9px] text-slate-500 text-center italic">
+                        CyberGuard A.I. is an educational platform. For real emergencies, contact authorities
+                        immediately.
+                    </div>
+                </div>
+            </div>
         </section>
 
     </main>
@@ -370,7 +423,7 @@
     <!-- JS LOGIC -->
     <script>
         lucide.createIcons();
-        const API_URL = "http://localhost:8000/api";
+        const API_URL = "/api";
         let history = [];
         let sessionId = "ML-" + Math.floor(Math.random() * 100000);
 
@@ -435,6 +488,73 @@
         }
 
         // --- CORE CHAT LOGIC ---
+        // --- IDENTITY LOGIC ---
+        // --- VOICE LOGIC ---
+        let isVoiceEnabled = true;
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (!isVoiceEnabled || !synth) return;
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = synth.getVoices();
+            const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Natural') || v.name.includes('Female'));
+            if (preferredVoice) utterance.voice = preferredVoice;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            synth.speak(utterance);
+        }
+
+        function togglePolicePanel() {
+            const panel = document.getElementById('police-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                speak("I've opened the safety guide for you. Please paste any content you're worried about, and I'll look at it gently.");
+            }
+        }
+
+        async function runPoliceCheck() {
+            const content = document.getElementById('police-content').value;
+            const resDiv = document.getElementById('res-police');
+            if (!content) return;
+
+            resDiv.innerHTML = '<div class="animate-pulse text-blue-400">Performing gentle forensic scan...</div>';
+            resDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/police/analyze-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_content: content })
+                });
+                const data = await response.json();
+                const analysis = data.analysis;
+
+                let html = `
+                    <div class="font-bold text-blue-400 uppercase text-[9px]">Result: ${analysis.threat_level} THREAT</div>
+                    <div class="text-white">${analysis.fraud_type}</div>
+                    <div class="text-[9px] text-slate-400 italic">${analysis.recommendations[0]}</div>
+                `;
+                resDiv.innerHTML = html;
+                speak(analysis.recommendations[0]);
+            } catch (e) {
+                resDiv.innerHTML = '<div class="text-red-400">Verification failed.</div>';
+            }
+        }
+
+        // --- IDENTITY LOGIC ---
+        function updateAgentIdentity() {
+            const persona = document.getElementById('personaSelect').value;
+            const chatHeader = document.querySelector('.text-[10px].text-slate-500.font-mono');
+            if (persona === 'police') {
+                chatHeader.innerText = "POLICE ADVISORY • ACTIVE ASSISTANCE";
+                speak("Hello. I am Officer Harsh. I've joined the session to help protect you. You can talk to me directly now.");
+            } else {
+                chatHeader.innerText = "ENCRYPTED CHANNEL • MONITORING";
+            }
+        }
+
+        // --- CORE CHAT LOGIC ---
         async function sendMessage() {
             const input = document.getElementById('mainInput');
             const text = input.value.trim();
@@ -445,33 +565,58 @@
             input.value = '';
             document.getElementById('typing').classList.remove('hidden');
 
+            const persona = document.getElementById('personaSelect').value;
+
             // Reset & Animate ML Card
             document.getElementById('ml-intent-text').innerText = "CALCULATING TENSORS...";
             document.getElementById('ml-intent-text').className = "text-center text-xs font-mono py-1.5 px-2 bg-indigo-900/30 text-indigo-300 border border-indigo-500/30 rounded animate-pulse";
 
             try {
-                const res = await fetch(`${API_URL}/honeypot`, {
-                    method: 'POST',
-                    headers: { 'x-api-key': 'sk_test_123456789', 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        sessionId: sessionId,
-                        message: { sender: 'scammer', text: text, timestamp: new Date().toISOString() },
-                        metadata: { persona: document.getElementById('personaSelect').value },
-                        conversationHistory: history
-                    })
-                });
-                const data = await res.json();
+                let res, data;
+                if (persona === 'police') {
+                    res = await fetch('/api/police/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: text })
+                    });
+                    data = await res.json();
+                    data.reply = data.response; // Normalize for the rest of the logic
+                } else {
+                    res = await fetch(`${API_URL}/honeypot`, {
+                        method: 'POST',
+                        headers: { 'x-api-key': 'sk_test_123456789', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            message: { sender: 'scammer', text: text, timestamp: new Date().toISOString() },
+                            metadata: { persona: persona },
+                            conversationHistory: history
+                        })
+                    });
+                    data = await res.json();
+                }
 
                 // 2. Update History
-                history.push({ sender: 'scammer', text: text });
-                history.push({ sender: 'agent', text: data.reply });
+                const timeStr = new Date().toISOString();
+                history.push({ sender: 'scammer', text: text, timestamp: timeStr });
+                if (data.reply) history.push({ sender: 'agent', text: data.reply, timestamp: timeStr });
 
                 // 3. Simulate "Thinking" Delay for realism
                 setTimeout(() => {
                     document.getElementById('typing').classList.add('hidden');
-                    addMsg('agent', data.reply);
-                    updateMLStats(data.ml_analysis);
-                    updateIntel(data.extracted_intelligence);
+                    if (data.reply) {
+                        addMsg('agent', data.reply, persona);
+                        if (persona === 'police') speak(data.reply);
+                    } else {
+                        addMsg('system', "Agent failed to generate a reply.");
+                    }
+
+                    if (data.ml_analysis) {
+                        updateMLStats(data.ml_analysis);
+                    }
+
+                    if (data.extracted_intelligence) {
+                        updateIntel(data.extracted_intelligence);
+                    }
                 }, 800 + Math.random() * 500);
 
             } catch (e) {
@@ -481,7 +626,7 @@
             }
         }
 
-        function addMsg(role, text) {
+        function addMsg(role, text, persona = 'naive') {
             const c = document.getElementById('chatContainer');
 
             let html = '';
@@ -489,10 +634,25 @@
                 html = `<div class="text-center text-[10px] text-red-400 font-mono my-2 border border-red-900 bg-red-900/10 p-1 rounded">${text}</div>`;
             } else {
                 const isAgent = role === 'agent';
+                let senderName = 'UNKNOWN SOURCE';
+                let styleClass = 'msg-scammer rounded-tr-none';
+
+                if (isAgent) {
+                    if (persona === 'police') {
+                        senderName = 'POLICE OFFICER (AI)';
+                        styleClass = 'bg-gradient-to-br from-blue-900/80 to-slate-900 border-l-4 border-blue-500 text-blue-100 rounded-tl-none';
+                    } else {
+                        senderName = 'SIMULATED TARGET';
+                        styleClass = 'msg-agent rounded-tl-none';
+                    }
+                } else {
+                    senderName = 'SUSPECT / INCOMING';
+                }
+
                 html = `
                 <div class="flex flex-col ${isAgent ? 'items-start' : 'items-end'} mb-4 animate-[fadeIn_0.3s_ease-out]">
-                    <div class="text-[9px] font-bold uppercase mb-1 text-slate-500 tracking-wider">${isAgent ? 'CyberGuard NODE-1' : 'UNKNOWN SOURCE'}</div>
-                    <div class="max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${isAgent ? 'msg-agent rounded-tl-none' : 'msg-scammer rounded-tr-none'}">
+                    <div class="text-[9px] font-bold uppercase mb-1 ${isAgent ? 'text-blue-400' : 'text-slate-500'} tracking-wider">${senderName}</div>
+                    <div class="max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${styleClass}">
                         ${text}
                     </div>
                 </div>`;
@@ -533,7 +693,7 @@
             bar.className = `h-full ${barColor} transition-all duration-1000`;
             bar.style.width = conf + "%";
 
-            intent.innerHTML = `<span class="${colorClass}">${riskLabel}:</span> ${ml.intent.toUpperCase().replace('_', ' ')}`;
+            intent.innerHTML = `<span class="${colorClass}">${riskLabel}:</span> ${(ml.intent || 'IDLE').toUpperCase().replace('_', ' ')}`;
             intent.className = "text-center text-xs font-mono py-1.5 px-2 bg-slate-800 rounded border border-slate-700 text-slate-300";
         }
 
@@ -553,6 +713,32 @@
                 if (!items || items.length === 0) return;
                 hasData = true;
 
+                // Color mapping for static Tailwind classes
+                const colorMap = {
+                    'emerald': {
+                        bg: 'bg-emerald-500/10',
+                        border: 'border-emerald-500/10',
+                        text: 'text-emerald-400'
+                    },
+                    'indigo': {
+                        bg: 'bg-indigo-500/10',
+                        border: 'border-indigo-500/10',
+                        text: 'text-indigo-400'
+                    },
+                    'cyan': {
+                        bg: 'bg-cyan-500/10',
+                        border: 'border-cyan-500/10',
+                        text: 'text-cyan-400'
+                    },
+                    'orange': {
+                        bg: 'bg-orange-500/10',
+                        border: 'border-orange-500/10',
+                        text: 'text-orange-400'
+                    }
+                };
+
+                const colors = colorMap[color] || colorMap['indigo'];
+
                 const itemsHtml = items.map(i => `
                     <div class="flex items-center justify-between group cursor-pointer hover:bg-slate-700/50 p-1.5 rounded transition">
                         <span class="truncate font-mono text-slate-300 select-all">${i}</span>
@@ -562,9 +748,9 @@
 
                 list.innerHTML += `
                 <div class="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden mb-2">
-                    <div class="bg-${color}-500/10 px-3 py-2 border-b border-${color}-500/10 flex items-center gap-2">
-                        <i data-lucide="${icon}" class="w-3 h-3 text-${color}-400"></i>
-                        <span class="text-[10px] font-bold uppercase text-${color}-400 tracking-wider">${label}</span>
+                    <div class="${colors.bg} px-3 py-2 border-b ${colors.border} flex items-center gap-2">
+                        <i data-lucide="${icon}" class="w-3 h-3 ${colors.text}"></i>
+                        <span class="text-[10px] font-bold uppercase ${colors.text} tracking-wider">${label}</span>
                     </div>
                     <div class="p-2 space-y-1 text-[11px]">
                         ${itemsHtml}
@@ -603,13 +789,14 @@
                 const data = await res.json();
 
                 // Style results
-                let riskColor = data.score > 0.7 ? 'text-red-400' : (data.score > 0.4 ? 'text-orange-400' : 'text-emerald-400');
-                let detailsHtml = data.details ? data.details.map(d => `<div class="text-slate-400">• ${d}</div>`).join('') : '';
+                let score = data.score !== undefined ? data.score : 0;
+                let riskColor = score > 0.7 ? 'text-red-400' : (score > 0.4 ? 'text-orange-400' : 'text-emerald-400');
+                let detailsHtml = (data.details && Array.isArray(data.details)) ? data.details.map(d => `<div class="text-slate-400">• ${d}</div>`).join('') : '<div class="text-slate-500 italic">No specific details verified.</div>';
 
                 resBox.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-bold text-slate-200">Analysis Result</span>
-                        <span class="font-mono font-bold ${riskColor}">${(data.score * 100).toFixed(0)}% RISK</span>
+                        <span class="font-mono font-bold ${riskColor}">${(score * 100).toFixed(0)}% RISK</span>
                     </div>
                     <div class="space-y-1 text-slate-500 font-mono text-[10px]">
                         ${detailsHtml}
