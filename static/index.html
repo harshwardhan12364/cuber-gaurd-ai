@@ -59,6 +59,8 @@
                 radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 40%),
                 radial-gradient(circle at 0% 90%, rgba(16, 185, 129, 0.1), transparent 30%);
             color: #e2e8f0;
+            overflow: hidden;
+            /* Prevent page scroll */
         }
 
         .glass-panel {
@@ -73,18 +75,44 @@
             border-color: rgba(99, 102, 241, 0.8);
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
+        /* Hide scrollbar for everything by default */
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Show scrollbar ONLY for chat and forensic tools */
+        #chatContainer::-webkit-scrollbar,
+        #forensicTools::-webkit-scrollbar {
+            display: block;
             width: 6px;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
+        #chatContainer::-webkit-scrollbar-track,
+        #forensicTools::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
+        #chatContainer::-webkit-scrollbar-thumb,
+        #forensicTools::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+
+        #chatContainer::-webkit-scrollbar-thumb:hover,
+        #forensicTools::-webkit-scrollbar-thumb:hover {
+            background: #6366f1;
+        }
+
+        /* Fallback for other browsers */
+        #chatContainer,
+        #forensicTools {
+            scrollbar-width: thin;
+            scrollbar-color: #4f46e5 transparent;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -190,7 +218,7 @@
     <main class="flex-1 p-4 lg:p-6 grid grid-cols-12 gap-6 overflow-hidden max-w-[1800px] mx-auto w-full relative z-10">
 
         <!-- 1. LEFT PANEL: DEEPER SCANNING TOOLS -->
-        <section class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto pr-1">
+        <section id="forensicTools" class="col-span-12 lg:col-span-3 flex flex-col gap-4 overflow-y-auto pr-1">
             <div class="flex items-center justify-between mb-1">
                 <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest"><i data-lucide="scan-line"
                         class="inline w-3 h-3 mr-1"></i> Forensic Tools</h2>

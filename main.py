@@ -1,10 +1,10 @@
 from __future__ import annotations
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 import re
 import random
 import logging
@@ -268,10 +268,12 @@ class Metadata(BaseModel):
     persona: Optional[str] = "naive" 
 
 class ScamRequest(BaseModel):
-    sessionId: str
-    message: Message
-    conversationHistory: List[Message] = []
-    metadata: Optional[Metadata] = None
+    sessionId: Optional[Any] = None
+    session_id: Optional[Any] = None
+    message: Optional[Any] = "STUB_MESSAGE"
+    conversationHistory: Optional[Any] = []
+    conversation_history: Optional[Any] = []
+    metadata: Optional[Any] = None
 
 class CheckRequest(BaseModel):
     type: str 
@@ -279,25 +281,54 @@ class CheckRequest(BaseModel):
 
 class VoiceDetectionRequest(BaseModel):
     language: str
-    audioFormat: str
-    audioBase64: str
+    audio_format: Optional[str] = None
+    audio_base64: Optional[str] = None
+    # Backward compatibility
+    audioFormat: Optional[str] = None
+    audioBase64: Optional[str] = None
 
 @app.post("/api/honeypot")
-def honeypot_api(data: ScamRequest, x_api_key: str = Header(None)):
-    if x_api_key != API_KEY: raise HTTPException(status_code=401, detail="Invalid API Key")
+async def honeypot_api(request: Request, x_api_key: str = Header(None)):
+    if x_api_key != API_KEY: 
+        raise HTTPException(status_code=401, detail="Invalid API Key")
 
-    intent, confidence = predict_intent(data.message.text)
+    # Resilience: Manual JSON parsing
+    try:
+        data = await request.json()
+    except:
+        data = {}
+
+    # Extract text content safely from any structure
+    msg_raw = data.get('message', 'N/A')
+    input_text = ""
+    if isinstance(msg_raw, str):
+        input_text = msg_raw
+    elif isinstance(msg_raw, dict):
+        input_text = msg_raw.get('text') or msg_raw.get('message') or str(msg_raw)
+    else:
+        input_text = str(msg_raw)
+
+    intent, confidence = predict_intent(input_text)
     
     url_pattern = r'(?:https?://|www\.)\S+|(?:[a-z0-9-]+\.)+(?:com|net|org|in|xyz|top|live|app|tk|ml)\S*'
     intel = {
-        "upiIds": re.findall(r"[\w.-]+@[\w.-]+", data.message.text),
-        "phoneNumbers": re.findall(r"(?:\+91|91)?[\-\s]?[6789]\d{9}", data.message.text),
-        "phishingLinks": [link.strip('.,!?;:') for link in re.findall(url_pattern, data.message.text, re.IGNORECASE)],
-        "suspiciousKeywords": [w for w in ["otp", "cvv", "expire", "block", "police", "kyc", "fraud", "help"] if w in data.message.text.lower()]
+        "upiIds": re.findall(r"[\w.-]+@[\w.-]+", input_text),
+        "phoneNumbers": re.findall(r"(?:\+91|91)?[\-\s]?[6789]\d{9}", input_text),
+        "phishingLinks": [link.strip('.,!?;:') for link in re.findall(url_pattern, input_text, re.IGNORECASE)],
+        "suspiciousKeywords": [w for w in ["otp", "cvv", "expire", "block", "police", "kyc", "fraud", "help"] if w in input_text.lower()]
     }
 
-    reply = generate_smart_reply(data.message.text, intent, data.metadata.persona if data.metadata else "naive", data.conversationHistory)
+    # Extract persona safely
+    metadata = data.get('metadata', {})
+    persona = "naive"
+    if isinstance(metadata, dict):
+        persona = metadata.get('persona', 'naive')
+    
+    # Extract history safely
+    history = data.get('conversation_history') or data.get('conversationHistory') or []
 
+    reply = generate_smart_reply(input_text, intent, persona, history)
+    
     return {
         "status": "success",
         "reply": reply,
@@ -442,7 +473,7 @@ def analyze_voice_origin(audio_b64: str, language: str):
         return "HUMAN", 0.75, "Standard human vocal profile identified by general synthesis check."
 
 @app.post("/api/voice-detection")
-def voice_detection_api(data: VoiceDetectionRequest, x_api_key: str = Header(None)):
+async def voice_detection_api(request: Request, x_api_key: str = Header(None)):
     # 1. API Key Validation
     if x_api_key != API_KEY:
         from fastapi.responses import JSONResponse
@@ -450,21 +481,35 @@ def voice_detection_api(data: VoiceDetectionRequest, x_api_key: str = Header(Non
             status_code=401,
             content={"status": "error", "message": "Invalid API key or malformed request"}
         )
+
+    # Resilience: Manual JSON parsing
+    try:
+        data = await request.json()
+    except:
+        data = {}
         
+    language = data.get('language', 'English')
+    
     # 2. Language Validation
-    if data.language not in VALID_LANGUAGES:
-        return {"status": "error", "message": f"Unsupported language: {data.language}. Supported: {VALID_LANGUAGES}"}
+    if language not in VALID_LANGUAGES:
+        return {"status": "error", "message": f"Unsupported language: {language}. Supported: {VALID_LANGUAGES}"}
         
-    # 3. Format Validation
-    if data.audioFormat.lower() != "mp3":
+    # 3. Format & Base64 Extraction
+    fmt = data.get('audio_format') or data.get('audioFormat') or "none"
+    b64 = data.get('audio_base64') or data.get('audio_base_64') or data.get('audioBase64')
+    
+    if fmt.lower() != "mp3":
         return {"status": "error", "message": "Only MP3 format is supported"}
+    
+    if not b64:
+        return {"status": "error", "message": "Missing audio_base64 data"}
         
     # 4. Perform Analysis
-    classification, confidence, explanation = analyze_voice_origin(data.audioBase64, data.language)
+    classification, confidence, explanation = analyze_voice_origin(b64, language)
     
     return {
         "status": "success",
-        "language": data.language,
+        "language": language,
         "classification": classification,
         "confidenceScore": confidence,
         "explanation": explanation
