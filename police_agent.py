@@ -15,7 +15,7 @@ class PoliceAgent:
     """
     
     def __init__(self):
-        self.agent_name = "Officer Harsh"
+        self.agent_name = "Harsh"
         self.badge_id = "CYB-2024-IND-7891"
         self.department = "National Cyber Defense Cell"
         
