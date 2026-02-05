@@ -286,6 +286,24 @@ class VoiceDetectionRequest(BaseModel):
     # Backward compatibility
     audioFormat: Optional[str] = None
     audioBase64: Optional[str] = None
+ 
+
+@app.get("/api/honeypot")
+async def honeypot_api(request: Request, x_api_key: str = Header(None)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+    data = await request.json()
+    reply = "Processed successfully"
+
+    return {
+        "status": "success",
+        "reply": reply
+    }
+
+
+    # existing code continues exactly as it is
+
 
 @app.post("/api/honeypot")
 async def honeypot_api(request: Request, x_api_key: str = Header(None)):
@@ -329,12 +347,11 @@ async def honeypot_api(request: Request, x_api_key: str = Header(None)):
 
     reply = generate_smart_reply(input_text, intent, persona, history)
     
+    # Super-Compatible Response Schema
     return {
-        "status": "success",
-        "reply": reply,
-        "ml_analysis": { "intent": intent, "confidence": confidence, "model": "CyberGuard-NeuralCore-v3" },
-        "extracted_intelligence": intel
-    }
+    "status": "success",
+    "reply": reply
+}
 
 @app.post("/api/check")
 def specific_check(data: CheckRequest):
@@ -520,8 +537,20 @@ async def voice_detection_api(request: Request, x_api_key: str = Header(None)):
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
-async def read_index(): 
-    return FileResponse(os.path.join("static", "index.html"))
+async def root_get():
+    return {
+        "status": "success",
+        "reply": "Service is running"
+    }
+
+@app.post("/")
+async def root_post():
+    return {
+        "status": "success",
+        "reply": "Service is running"
+    }
+
+
 
 @app.get("/police")
 async def read_police(): 
@@ -529,5 +558,7 @@ async def read_police():
 
 if __name__ == "__main__":
     import uvicorn
-    logger.info("Starting CyberGuard Neural Engine on port 8001...")
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    port = int(os.environ.get("PORT", 10000))
+    logger.info(f"Starting CyberGuard Neural Engine on port {port}...")
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
